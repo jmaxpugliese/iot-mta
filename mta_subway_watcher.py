@@ -16,6 +16,13 @@ class SubwayWatcher(object):
   def __init__(self):
     self.db_cleanup_daemon = db_cleanup.DbCleanup()
 
+  def update_mta_data(self):
+    # fetch mta feed
+    
+    # parse return
+
+    # post to db
+
   def exit_with_msg(self, msg, err):
     '''
     Print message then exit.
@@ -34,6 +41,7 @@ class SubwayWatcher(object):
       # run update every 30 seconds
       while True:
         print("Fetch update: %s" % time.ctime())
+        update_mta_data()
         time.sleep(30)
 
     except KeyboardInterrupt:
