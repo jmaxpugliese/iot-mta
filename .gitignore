@@ -5,6 +5,9 @@
 # VS Code
 .vscode
 
+# Python class files
+*.pyc
+
 # Python virtualenv
 /bin
 /include

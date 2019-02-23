@@ -2,9 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import time
-import threading
 
 import db_cleanup
+
+sys.path.append('./utils')
+import mta_updates
 
 class SubwayWatcher(object):
   '''
@@ -17,11 +19,11 @@ class SubwayWatcher(object):
     self.db_cleanup_daemon = db_cleanup.DbCleanup()
 
   def update_mta_data(self):
-    # fetch mta feed
+    # fetch mta updates
     
-    # parse return
+  #   # parse return
 
-    # post to db
+  #   # post to db
 
   def exit_with_msg(self, msg, err):
     '''
