@@ -1,0 +1,14 @@
+
+# OSX 
+.DS_Store
+
+# VS Code
+.vscode
+
+# Python virtualenv
+/bin
+/include
+/lib
+.Python
+pip-selfcheck.json
+
