@@ -15,3 +15,9 @@
 .Python
 pip-selfcheck.json
 
+# External protocol buffer files
+*.proto
+
+# Protocol buffer compiled files
+*_pb2.py
+
