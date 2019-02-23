@@ -7,11 +7,11 @@ import threading
 class DbCleanup(threading.Thread):
 
   def run(self):
-    # run cleanup every 120 seconds
+    # run cleanup every 60 seconds
     while True:
       print("Cleanup database: %s" % time.ctime())
       # delete_stale_data()
-      time.sleep(120)
+      time.sleep(60)
 
   # def delete_stale_data(self):
     # conntect to database

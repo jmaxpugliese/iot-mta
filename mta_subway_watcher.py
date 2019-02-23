@@ -21,10 +21,10 @@ class SubwayWatcher(object):
 
   def update_mta_data(self):
     # fetch mta updates
-    updater = mta_updates.MTAUpdates()
-    updater.getTripUpdates()
+    mta_updater = mta_updates.MTAUpdates()
+    mta_updater.update()
 
-    # post to db
+    #TODO - post to db
 
   def exit_with_msg(self, msg, err):
     '''

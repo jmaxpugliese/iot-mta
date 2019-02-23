@@ -8,6 +8,11 @@ import contextlib
 import google.protobuf
 import gtfs_realtime_pb2
 
+# gtfs objects
+import alert
+import vehicle
+import trip_update
+
 # feed url depends on the routes to which you want updates
 # here we are using feed 1 , which has lines 1,2,3,4,5,6,S
 MTA_URL = 'http://datamine.mta.info/mta_esi.php?feed_id=1&key='
@@ -26,12 +31,12 @@ class MTAUpdates(object):
 
   def __init__(self):
     self.alerts = []
-    self.tripUpdates = []
+    self.trip_updates = {}
 
     # MTA update feed url
     self.feed_url = MTA_URL + MTA_API_KEY
 
-  def getTripUpdates(self):
+  def update(self):
     '''
     Get trip updates from mta real time feed
     '''
@@ -46,7 +51,35 @@ class MTAUpdates(object):
     except (urllib2.URLError, google.protobuf.message.DecodeError) as e:
       print "Error while connecting to mta server: " +str(e)
 
-    # parse timestamp
+    # parse for timestamp
     timestamp = feed.header.timestamp
     nytime = datetime.datetime.fromtimestamp(timestamp, TIMEZONE)
 
+    # parse feed
+    for entity in feed.entity:
+
+	    # trip update represents a change in timetable
+      if entity.trip_update and entity.trip_update.trip.trip_id:
+
+        # create new trip update
+        tu = trip_update.TripUpdate(entity.trip_update)
+
+        # add update to the trip dictionary
+        self.trip_updates[tu.trip_id] = tu
+
+      # vehicle update gets added to pre-existing trip update
+      if entity.vehicle and entity.vehicle.trip.trip_id:
+        
+        # create vehicle
+        v = vehicle.Vehicle(entity.vehicle)
+
+        # add vehicle to trip_update
+        tid = entity.vehicle.trip.trip_id
+        if self.trip_updates[tid]:
+          self.trip_updates[tid].set_vehicle(v)
+
+      # push new alert
+      if entity.alert:
+        #TODO - pick back up with alerts
+        a = alert.Alert(entity.alert)
+        self.alerts.append(a)
