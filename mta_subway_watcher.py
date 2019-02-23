@@ -1,6 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import sys
 import time
 
 import db_cleanup
@@ -20,10 +21,10 @@ class SubwayWatcher(object):
 
   def update_mta_data(self):
     # fetch mta updates
-    
-  #   # parse return
+    updater = mta_updates.MTAUpdates()
+    updater.getTripUpdates()
 
-  #   # post to db
+    # post to db
 
   def exit_with_msg(self, msg, err):
     '''
@@ -43,11 +44,11 @@ class SubwayWatcher(object):
       # run update every 30 seconds
       while True:
         print("Fetch update: %s" % time.ctime())
-        update_mta_data()
+        self.update_mta_data()
         time.sleep(30)
 
     except KeyboardInterrupt:
-          self.exit_with_msg('Closing MTA Subway Watcher.', None)
+      self.exit_with_msg('Closing MTA Subway Watcher.', None)
 
 
 
