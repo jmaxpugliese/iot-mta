@@ -14,7 +14,7 @@ class SubwayWatcher(object):
   '''
 
   def __init__(self):
-    self.db_cleanup_daemon = 'stub'
+    self.db_cleanup_daemon = db_cleanup.DbCleanup()
 
   def exit_with_msg(self, msg, err):
     '''
@@ -28,6 +28,8 @@ class SubwayWatcher(object):
   def run(self):
     try:
       # start DB clean up daemon
+      self.db_cleanup_daemon.setDaemon(True)
+      self.db_cleanup_daemon.start()
 
       # run update every 30 seconds
       while True:
