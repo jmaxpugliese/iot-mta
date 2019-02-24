@@ -27,6 +27,8 @@ class SubwayWatcher(object):
     #TODO - connect to aws
 
     #TODO - post updates
+    # data is found in `mta_updater.trip_updates`,
+    # which is a dict with `trip_id` acting as the keys
 
   def exit_with_msg(self, msg, err):
     '''
