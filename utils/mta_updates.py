@@ -79,7 +79,6 @@ class MTAUpdates(object):
           self.trip_updates[tid].set_vehicle(v)
 
       # push new alert
-      if entity.alert:
-        #TODO - pick back up with alerts
+      if entity.alert and entity.alert.informed_entity:
         a = alert.Alert(entity.alert)
         self.alerts.append(a)

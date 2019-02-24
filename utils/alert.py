@@ -18,4 +18,13 @@ class Alert(object):
 
   # accepts alert object
   def set(self, a):
-    print('')
+
+    # set message
+    for t in a.header_text.translation:
+      self.msg = t.text
+      break
+
+    # set trip info
+    for ie in a.informed_entity:
+      self.trip_id.append(ie.trip.trip_id)
+      self.route_id = ie.trip.route_id

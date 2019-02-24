@@ -28,9 +28,6 @@ class TripUpdate(object):
     self.route_id = tu.trip.route_id
     self.start_date = tu.trip.start_date
 
-    # if tu.vehicle:
-    #   self.set_vehicle(tu)
-
     for stu in tu.stop_time_update: 
       # set update direction
       self.set_direction(stu.stop_id)
