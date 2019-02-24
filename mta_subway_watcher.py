@@ -24,7 +24,9 @@ class SubwayWatcher(object):
     mta_updater = mta_updates.MTAUpdates()
     mta_updater.update()
 
-    #TODO - post to db
+    #TODO - connect to aws
+
+    #TODO - post updates
 
   def exit_with_msg(self, msg, err):
     '''

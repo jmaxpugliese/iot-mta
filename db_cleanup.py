@@ -14,6 +14,6 @@ class DbCleanup(threading.Thread):
       time.sleep(60)
 
   # def delete_stale_data(self):
-    # conntect to database
+    #TODO - conntect to aws
 
-    # delete data with timestamp prior to current time - 120s
+    #TODO - delete data with timestamp prior to current time - 60s
