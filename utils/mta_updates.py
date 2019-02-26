@@ -9,9 +9,9 @@ import google.protobuf
 import gtfs_realtime_pb2
 
 # gtfs objects
-from utils.alert import Alert
-from utils.vehicle import Vehicle
-from utils.trip_update import TripUpdate
+from alert import Alert
+from vehicle import Vehicle
+from trip_update import TripUpdate
 
 # feed url depends on the routes to which you want updates
 # here we are using feed 1 , which has lines 1,2,3,4,5,6,S
@@ -61,6 +61,7 @@ class MTAUpdates(object):
             if entity.trip_update and entity.trip_update.trip.trip_id:
                 # create new trip update
                 tu = TripUpdate(entity.trip_update)
+                tu.set_timestamp(timestamp)
 
                 # add update to the trip dictionary
                 self.trip_updates[tu.trip_id] = tu

@@ -1,6 +1,8 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
+import json
+import time
 from collections import OrderedDict
 
 """
@@ -16,6 +18,7 @@ class TripUpdate(object):
         self.start_date = None
         self.direction = None
         self.vehicle_data = None
+        self.timestamp = None
 
         # Format {stopId : [arrivalTime,departureTime]}
         self.future_stops = OrderedDict()
@@ -36,6 +39,9 @@ class TripUpdate(object):
             # insert future stop
             self.add_future_stop(stu)
 
+    def set_timestamp(self, t):
+        self.timestamp = t
+
     def set_direction(self, stop_id):
         self.direction = stop_id[-1]
 
@@ -45,3 +51,14 @@ class TripUpdate(object):
     # comes from a vehicle entity
     def set_vehicle(self, vehicle):
         self.vehicle_data = vehicle
+
+    def to_string(self):
+        return {
+            "trip_id": self.trip_id,
+            "route_id": self.route_id,
+            "start_date": self.start_date,
+            "direction": self.direction,
+            "timestamp": str(self.timestamp),
+            "vehicle_data": (self.vehicle_data.to_string() if self.vehicle_data else None),
+            "future_stops": json.dumps(self.future_stops)
+        }

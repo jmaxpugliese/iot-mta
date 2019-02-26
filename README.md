@@ -13,6 +13,8 @@ E. Activate virtual environment: `source bin/activate`
 
 F. Install World Timezone information: `pip install pytz`
 
+F. Install World Timezone information: `pip install boto3`
+
 Mac install GTFS
 curl -O https://developers.google.com/transit/gtfs-realtime/gtfs-realtime.proto
 curl -O http://datamine.mta.info/sites/all/files/pdfs/nyct-subway.proto.txt && mv nyct-subway.proto.txt nyct-subway.proto

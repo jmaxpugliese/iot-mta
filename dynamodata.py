@@ -8,26 +8,27 @@ from threading import Thread
 
 import boto3
 from boto3.dynamodb.conditions import Key,Attr
-from utils.mta_updates import MTAUpdates
-import utils.aws as aws
+sys.path.append('./utils')
+from mta_updates import MTAUpdates
+import aws as aws
 
 ### YOUR CODE HERE ####
 DYNAMO_TABLE_NAME = 'mtaData'
 
-dynamodb = boto3.resource('dynamodb')
-#dynamodb = aws.getResource('dynamodb','us-east-1')
+# dynamodb = boto3.resource('dynamodb')
+dynamodb = aws.getResource('dynamodb','us-east-1')
 try:
     table = dynamodb.create_table(
         AttributeDefinitions=[
             {
-                'AttributeName': 'tripid',
+                'AttributeName': 'trip_id',
                 'AttributeType': 'S'
             }
         ],
         TableName=DYNAMO_TABLE_NAME,
         KeySchema=[
             {
-                'AttributeName': 'tripid',
+                'AttributeName': 'trip_id',
                 'KeyType': 'HASH'
             }
         ],
@@ -45,16 +46,17 @@ except Exception as e:
 
 def data_purge(table):
     while True:
-        time.sleep(120)
+        time.sleep(60)
+        print("pruging")
         expiretime = str(time.time() - 120)
         response = table.scan(
-            ScanFilter={"timeStamp": {
+            ScanFilter={"timestamp": {
                 "AttributeValueList": [expiretime],
                 "ComparisonOperator": "LE"}}
         )
         for item in response['Items']:
             table.delete_item(
-                Key={'tripid': item['tripid']}
+                Key={'trip_id': item['trip_id']}
             )
 
 
@@ -74,9 +76,12 @@ def data_update(table):
     """
 
 
-    for key, item in mta_updater.trip_updates:
-        table.put_item(Item=item)
-    time.sleep(60)
+    for key in mta_updater.trip_updates:
+        # print(mta_updater.trip_updates[key])
+        # print(mta_updater.trip_updates[key].to_string() )
+        table.put_item(Item=mta_updater.trip_updates[key].to_string())
+    print('put!')
+    time.sleep(30)
 
 
 t2 = Thread(name='datapurge', target=data_purge, args=(table,))
