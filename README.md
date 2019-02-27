@@ -17,7 +17,9 @@ F. Install World Timezone information: `pip install boto3`
 
 
 Steps to inswtall protobuf on Mac:
+
 curl -O https://developers.google.com/transit/gtfs-realtime/gtfs-realtime.proto
+
 curl -O http://datamine.mta.info/sites/all/files/pdfs/nyct-subway.proto.txt && mv nyct-subway.proto.txt nyct-subway.proto
 
 brew install protobuf
