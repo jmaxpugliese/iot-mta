@@ -11,6 +11,7 @@ Collection for trip related data
 
 
 class TripUpdate(object):
+    StopStatus = ["INCOMING_AT", "STOPPED_AT", "IN_TRANSIT_TO"] 
     # accepts, optional, trip_update object
     def __init__(self, tu=None):
         self.trip_id = None
@@ -52,13 +53,15 @@ class TripUpdate(object):
     def set_vehicle(self, vehicle):
         self.vehicle_data = vehicle
 
-    def to_string(self):
+    def to_json(self):
         return {
             "trip_id": self.trip_id,
             "route_id": self.route_id,
             "start_date": self.start_date,
             "direction": self.direction,
-            "timestamp": str(self.timestamp),
-            "vehicle_data": (self.vehicle_data.to_string() if self.vehicle_data else None),
-            "future_stops": json.dumps(self.future_stops)
+            "timestamp": self.timestamp,
+            "current_stop_id": self.vehicle_data.current_stop_id if self.vehicle_data else None,
+            "current_stop_status": TripUpdate.StopStatus[self.vehicle_data.current_stop_status] if self.vehicle_data else None,
+            "vehicleTimeStamp": self.vehicle_data.timestamp if self.vehicle_data else None,
+            "future_stops": self.future_stops
         }

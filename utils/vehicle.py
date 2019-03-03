@@ -23,11 +23,3 @@ class Vehicle(object):
         self.current_stop_id = v.stop_id
         self.timestamp = v.timestamp
         self.current_stop_status = v.current_status
-
-    def to_string(self):
-        return {
-            "current_stop_number": self.current_stop_number,
-            "current_stop_id": self.current_stop_id,
-            "timestamp": self.timestamp,
-            "current_stop_status": self.current_stop_status
-        }

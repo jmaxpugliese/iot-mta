@@ -23,3 +23,5 @@ pip-selfcheck.json
 
 # Credentials
 config.txt
+IoT.pem
+
