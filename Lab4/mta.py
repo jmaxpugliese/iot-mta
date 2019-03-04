@@ -11,7 +11,7 @@
 
 from boto3.dynamodb.conditions import Key, Attr
 from threading import Thread
-import time, csv, sys, boto3
+import time, csv, sys, boto3, json
 # local package
 sys.path.append("./utils")
 import aws as aws
@@ -131,9 +131,9 @@ def tripPlan(table, src, dst, dir):
         Dprint("Time when arrive at 42nd w/o switch at 96th: w({0}), o({1})".format(doSwitch, noSwitch))
 
         if noSwitch <= doSwitch:
-            print "Stay on the Local Train!"
+            sendMessage( "Stay on the Local Train!")
         else:
-            print "Switch to Express Train!"
+            sendMessage( "Switch to Express Train!")
     else:
         local_trains = getLocalAfter(table, dir, "1", "127N")
         earliest_local = getEarliestTrain(local_trains, "127N")
@@ -157,11 +157,33 @@ def tripPlan(table, src, dst, dir):
         Dprint("Time when arrive at 42nd w/o switch at 96th: w({0}), o({1}).".format(doSwitch, noSwitch))
 
         if noSwitch <= doSwitch:
-            print "Stay on the Local Train!"
+            sendMessage( "Stay on the Local Train!")
         else:
-            print "Switch to Express Train!"
+            sendMessage( "Switch to Express Train!")
 
     return
+
+def sendMessage(msg):
+    with open('Lab4/config.json') as json_config:  
+        config = json.load(json_config)
+
+        client = boto3.client(
+            'sns',
+            aws_access_key_id = config['aws_access_key_id'],
+            aws_secret_access_key = config['aws_secret_access_key'],
+            region_name = config['aws_region']
+        )
+
+        topic = client.create_topic(Name="mtaSub")
+        topic_arn = topic['TopicArn']
+        client.subscribe(
+            TopicArn=topic_arn,
+            Protocol='sms',
+            Endpoint='17175722449'#phoneNumber # <-- number who'll receive an SMS message.
+        )
+
+        client.publish(Message=msg, TopicArn=topic_arn)
+        print('sent: ' + msg)
 
 
 def main():
