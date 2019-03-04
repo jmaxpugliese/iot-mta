@@ -12,8 +12,8 @@ TOPIC  = 'Temperature in EE Lab'
 try:
   client = boto3.client(
     'sns',
-    aws_access_key_id = 'AKIAIMYA47HKCUCKX54Q',
-    aws_secret_access_key = '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',
+    aws_access_key_id = '',
+    aws_secret_access_key = '',
     region_name = REGION
   )
 
