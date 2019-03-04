@@ -38,6 +38,7 @@ try:
 
     # sent
     print("sent")
+    client.publish(Message=temperature, TopicArn=topic_arn)
 
 except KeyboardInterrupt:
   exit
