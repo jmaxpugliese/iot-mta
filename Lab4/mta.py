@@ -179,17 +179,16 @@ def sendMessage(msg):
         client.subscribe(
             TopicArn=topic_arn,
             Protocol='sms',
-            Endpoint='17175722449'#phoneNumber # <-- number who'll receive an SMS message.
+            Endpoint='1-717-572-2449'#phoneNumber # <-- number who'll receive an SMS message.
         )
 
-        client.publish(Message=msg, TopicArn=topic_arn)
+        resp = client.publish(Message=msg, TopicArn=topic_arn)
+
         print('sent: ' + msg)
+        print(resp)
 
 
 def main():
-    #dynamodb = boto3.getResource("dynamodb","us-east-1")
-    #snsClient = boto3.getClient("sns","us-east-1")
-    #snsResource = boto3.getResource("sns","us-east-1")
     
     dynamoTable = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
