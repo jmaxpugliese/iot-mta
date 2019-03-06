@@ -19,8 +19,17 @@ import aws as aws
 # Constants
 DYNAMODB_TABLE_NAME = "mtaData"
 DEBUG = True
+with open('Lab4/config.json') as json_config:  
+    config = json.load(json_config)
+    client = boto3.client(
+        'sns',
+        aws_access_key_id = config['aws_access_key_id'],
+        aws_secret_access_key = config['aws_secret_access_key'],
+        region_name = config['aws_region']
+    )
+    topic = client.create_topic(Name="mtaSub")
+    topic_arn = topic['TopicArn']
 
-#dynamodb = boto3.resource("dynamodb")
 dynamodb = aws.getResource("dynamodb","us-east-1")
 
 def Dprint(context):
@@ -30,7 +39,7 @@ def Dprint(context):
 # prompt
 def prompt():
     print ""
-    print "> Available Commands are : "
+    print "> Available Commands are: "
     print "1. plan trip"
     print "2. subscribe to message feed"
     print "3. exit"  
@@ -41,7 +50,7 @@ def buildStationssDB():
         reader = csv.reader(f)
         for row in reader:
             stations.append(row[0])
-    return stations
+    return stations[1:]
 
 
 ##############################################
@@ -164,32 +173,20 @@ def tripPlan(table, src, dst, dir):
     return
 
 def sendMessage(msg):
-    with open('Lab4/config.json') as json_config:  
-        config = json.load(json_config)
+    resp = client.publish(Message=msg, TopicArn=topic_arn)
+    Dprint('sent: ' + msg)
+    Dprint(resp)
 
-        client = boto3.client(
-            'sns',
-            aws_access_key_id = config['aws_access_key_id'],
-            aws_secret_access_key = config['aws_secret_access_key'],
-            region_name = config['aws_region']
-        )
-
-        topic = client.create_topic(Name="mtaSub")
-        topic_arn = topic['TopicArn']
-        client.subscribe(
-            TopicArn=topic_arn,
-            Protocol='sms',
-            Endpoint='1-717-572-2449'#phoneNumber # <-- number who'll receive an SMS message.
-        )
-
-        resp = client.publish(Message=msg, TopicArn=topic_arn)
-
-        print('sent: ' + msg)
-        print(resp)
+def addSubcriber(phoneNumber):
+    client.subscribe(
+        TopicArn=topic_arn,
+        Protocol='sms',
+        Endpoint=phoneNumber #phoneNumber # <-- number who'll receive an SMS message.
+    )
+    print "Success! Now {} will receive notifications!".format(phoneNumber)
 
 
 def main():
-    
     dynamoTable = dynamodb.Table(DYNAMODB_TABLE_NAME)
 
     # Get list of all stopIds
@@ -209,6 +206,9 @@ def main():
                     sys.stdout.write("> Invalid stop id. Enter a valid stop id")
                     sys.stdout.flush()
                     continue
+                else:
+                    if sourceStop[-1] in ["N","S"]:
+                        sourceStop = sourceStop[:-1]
 
                 sys.stdout.write("> Enter destination : ")
                 destinationStop = sys.stdin.readline().strip()
@@ -216,6 +216,9 @@ def main():
                     sys.stdout.write("> Invalid stop id. Enter a valid stop id")
                     sys.stdout.flush()
                     continue
+                else:
+                    if destinationStop[-1] in ["N","S"]:
+                        destinationStop = destinationStop[:-1]
 
                 sys.stdout.write("> Type N for uptown, S for downtown: ")
                 direction = sys.stdin.readline().strip()
@@ -228,18 +231,25 @@ def main():
                 ###############################
                 # YOUR CODE HERE #
                 ###############################
-                tripPlan(dynamoTable, sourceStop, destinationStop, direction)
+                if direction == "S":
+                    if sourceStop > "120" or destinationStop != "127":
+                        print "Unsupported trip!"
+                        continue
+                else:
+                    if destinationStop > "120" or sourceStop != "127":
+                        print "Unsupported trip!"
+                        continue
+                tripPlan(dynamoTable, sourceStop+direction, destinationStop+direction, direction)
             elif userIn == "2":
-                sys.stdout.write(">Enter phonenumber")
+                sys.stdout.write("> Enter phonenumber: ")
                 phoneNumber = sys.stdin.readline().strip()
                 ###############################
                 # YOUR CODE HERE #
                 ###############################
+                addSubcriber(phoneNumber)
 
             else:
                 sys.exit()
-
-        # check how if there are any 2 or
 
 
 if __name__ == "__main__":
