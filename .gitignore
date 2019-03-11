@@ -14,6 +14,7 @@
 /lib
 .Python
 pip-selfcheck.json
+.idea
 
 # External protocol buffer files
 *.proto
