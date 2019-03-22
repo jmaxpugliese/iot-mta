@@ -1,0 +1,32 @@
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'temp/index.css' %}" />
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+<div id="chart_div"></div>
+
+<script type="text/javascript">
+
+google.charts.load('current', {packages: ['corechart', 'bar']});
+google.charts.setOnLoadCallback(drawBarColors); 
+
+function drawBarColors() {
+      var data = google.visualization.arrayToDataTable([
+        ['City', '2010 Population'],
+        ['Room Temp', {{ temp }}]
+      ]);
+
+      var options = {
+        title: 'Temperature',
+        chartArea: {width: '50%'},
+        colors: ['#b0120a'],
+        hAxis: {
+          title: 'Degrees',
+          minValue: 0
+        }
+      };
+      var chart = new google.visualization.BarChart(document.getElementById('chart_div'));
+      chart.draw(data, options);
+    }
+
+</script>

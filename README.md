@@ -13,7 +13,10 @@ E. Activate virtual environment: `source bin/activate`
 
 F. Install World Timezone information: `pip install pytz`
 
-F. Install World Timezone information: `pip install boto3`
+G. Install World Timezone information: `pip install boto3`
+
+H. For Lab 6: `pip install django`
+  - Launch the web server by running: `python manage.py runserver <your ip address>:<port number>`
 
 /*******************************************************************************/
 
