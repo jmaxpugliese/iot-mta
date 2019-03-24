@@ -1,0 +1,16 @@
+{% if locations %}
+    Choose a location to get the temperature for:
+    <ul>
+    {% for location in locations %}
+        <li><a href="/app/{{ location.name }}/">{{ location.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No locations are available.</p>
+{% endif %}
+
+<form action="{% url 'app:add_loc' %}" method="post">
+    {% csrf_token %}
+    <input type="text" name="loc_name" id="loc_name"/>
+    <input type="submit" value="Add a new location" />
+</form>
