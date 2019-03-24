@@ -1,8 +1,8 @@
 {% if locations %}
-    Choose a location to get the temperature for:
+    Choose a location to start from:
     <ul>
     {% for location in locations %}
-        <li><a href="/app/{{ location.name }}/">{{ location.name }}</a></li>
+        <li><a href="source/{{ location.name }}/">{{ location.name }}</a></li>
     {% endfor %}
     </ul>
 {% else %}

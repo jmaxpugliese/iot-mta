@@ -1,0 +1,10 @@
+{% if locations %}
+    Choose a location to end:
+    <ul>
+    {% for location in locations %}
+        <li><a href="destination/{{ location.name }}">{{ location.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No locations are available.</p>
+{% endif %}

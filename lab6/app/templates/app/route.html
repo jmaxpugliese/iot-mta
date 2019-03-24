@@ -1,0 +1,30 @@
+<h1>
+{{ src }}
+  <img src="http://openweathermap.org/img/w/{{ src_icon }}.png" alt="Image">
+</h1>
+<br/>
+
+{{ src_temperature }} degrees
+
+<br/>
+<br/>
+
+<h1>
+    {{ dest }}
+      <img src="http://openweathermap.org/img/w/{{ dest_icon }}.png" alt="Image">
+    </h1>
+    <br/>
+    
+    {{ dest_temperature }} degrees
+    
+    <br/>
+    <br/>
+    <a href="/app/">Start over</a>
+
+    <iframe
+  width="600"
+  height="450"
+  frameborder="0" style="border:0"
+  src="https://www.google.com/maps/embed/v1/directions?key=AIzaSyAQ_c3T-tDFCREydva3Ofrd43BhrPvP_QM&origin=Chicago
+  &destination=New York" allowfullscreen>
+</iframe>
