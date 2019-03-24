@@ -26,4 +26,5 @@ pip-selfcheck.json
 config.txt
 config.json
 IoT.pem
+django-iot.pem
 
