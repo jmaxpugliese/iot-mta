@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 import pytz
 import urllib2
 import datetime
@@ -36,7 +33,6 @@ class MTAUpdates(object):
 
     def update(self):
         """
-
         :param self: Get trip updates from mta real time feed
         :return:
         """
@@ -81,3 +77,4 @@ class MTAUpdates(object):
             if entity.alert and entity.alert.informed_entity:
                 a = Alert(entity.alert)
                 self.alerts.append(a)
+                
