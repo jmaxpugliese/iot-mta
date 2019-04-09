@@ -1,0 +1,29 @@
+install dlib and opencv
+1. install imutils
+$pip install --upgrade imutils
+2. get virtual environment manager
+$pip install virtualenv virtualenvwrapper
+   put these 3 lines in ~/.bash_profile:
+      export VIRTUALENVWRAPPER_PYTHON=/usr/local/bin/python3 
+      export VIRTUALENVWRAPPER_VIRTUALENV=/usr/local/bin/virtualenv
+      source /usr/local/bin/virtualenvwrapper.sh
+
+$source ~/.bash_profile
+
+3. create a virtual environment
+   $mkvirtualenv py3_dlib -p python3
+   $workon py3_dlib
+   $deactivate
+4. install dlib prerequisites using homebrew
+   reference link: https://www.pyimagesearch.com/2017/03/27/how-to-install-dlib/
+   https://www.learnopencv.com/install-dlib-on-macos/
+   $brew install cmake
+   $brew install boost
+   $brew cask install xquartz
+   $brew install boost-python3
+   
+5. $pip install numpy
+   $pip install scipy
+   $pip install scikit-image
+   $pip install dlib
+   $pip install opencv-contrib-python
