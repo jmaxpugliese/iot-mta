@@ -24,6 +24,7 @@ pip-selfcheck.json
 
 # Credentials
 config.txt
+aws.json
 config.json
 IoT.pem
 django-iot.pem
