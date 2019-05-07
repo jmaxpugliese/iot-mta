@@ -74,85 +74,42 @@ def showPose(im,image_points):
   distance=dist.euclidean(p1,p2)  
   cv2.line(im, p1, p2, (255,0,0), 2)
   return im ,distance
-#main function
-# construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
-ap.add_argument("-p", "--shape-predictor", required=True,
-	help="path to facial landmark predictor")
-ap.add_argument("-v", "--video", type=str, default="",
-	help="path to input video file")
-args = vars(ap.parse_args())
- 
-# define two constants, one for the eye aspect ratio to indicate
-# blink and then a second constant for the number of consecutive
-# frames the eye must be below the threshold
-EYE_AR_THRESH = 0.27
-EYE_AR_CONSEC_FRAMES = 2
-MOUTH_YA_CONSEC_FRAMES=9
-MOUTH_YAWNING_THRESH=0.7
-# initialize the frame counters and the total number of blinks
-COUNTER = 0
-TOTAL = 0
-mouthCounter=0
-totalYawn=0
-s=''
-ear=0
+def get_predictor():
+#
 # initialize dlib's face detector (HOG-based) and then create
 # the facial landmark predictor
-print("[INFO] loading facial landmark predictor...")
-detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor(args["shape_predictor"])
+  print("[INFO] loading facial landmark predictor...")
+  detector = dlib.get_frontal_face_detector()
+  predictor = dlib.shape_predictor("shape_predictor_68_face_landmarks.dat")
 
 # grab the indexes of the facial landmarks for the left and
 # right eye, respectively
-(lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
-print(lStart)
-(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
-(mStart,mEnd)=face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
-print(mStart,mEnd)
-# start the video stream thread
-print("[INFO] starting video stream thread...")
-#vs = FileVideoStream(args["video"]).start()
-#fileStream = True
-vs = VideoStream(src=0).start()
-# vs = VideoStream(usePiCamera=True).start()
-fileStream = False
-time.sleep(1.0)
+  return detector,predictor
 
-# loop over frames from the video stream
-count=0
-while True:
-	# if this is a file video stream, then we need to check if
-	# there any more frames left in the buffer to process
-	if fileStream and not vs.more():
-		break
-
-	# grab the frame from the threaded video file stream, resize
-	# it, and convert it to grayscale
-	# channels)
-	frame = vs.read()
-	
-	#try:
-	  #frame = imutils.resize(frame, width=860)
-	#except AttributeError:
-	#	print("[INFO] finished this video")
-		#break
-	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	
+def process_oneframe(frame,detector,predictor):
+  (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
+  #print(lStart)
+  (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
+  (mStart,mEnd)=face_utils.FACIAL_LANDMARKS_IDXS["mouth"]
+  #print(mStart,mEnd)
+  #frame = cv2.imread('snapshotGrey%s.jpg'%(i),1)#read image in grey scale
+	#gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 	# detect faces in the grayscale frame
-	rects = detector(gray, 0)
+  rects = detector(frame, 0)
+  detectFace=len(rects)
+  ear=0
+  yawningRatio=0
+  distance=0
 	#print(rects)
 	# We now need to loop over each of the faces in the frame and 
 	# then apply facial landmark detection to each of them
-	for rect in rects:
+  for rect in rects:
 		# determine the facial landmarks for the face region, then
 		# convert the facial landmark (x, y)-coordinates to a NumPy
 		# array
-		shape = predictor(gray, rect)
-		
-		shape = face_utils.shape_to_np(shape)
-
-		image_points=np.array([
+        shape = predictor(frame, rect)
+        shape = face_utils.shape_to_np(shape)
+        image_points=np.array([
 			shape[30],     # Nose tip
             shape[8],     # Chin
             shape[45],     # Left eye left corner
@@ -160,60 +117,81 @@ while True:
             shape[54],     # Left Mouth corner
             shape[48]      # Right mouth corner
 			],dtype='double')
-		frame,distance=showPose(frame,image_points)
-		print(distance)
+        frame,distance=showPose(frame,image_points)
+        print(distance)
 		#print("******************************")
 		# extract the left and right eye coordinates, then use the
 		# coordinates to compute the eye aspect ratio for both eyes
-		leftEye = shape[lStart:lEnd]
-		rightEye = shape[rStart:rEnd]
-		mouth=shape[mStart:mEnd]
-		leftEAR = eye_aspect_ratio(leftEye)
-		rightEAR = eye_aspect_ratio(rightEye)
-		yawningRatio=detect_yanwing(mouth)
-		#print(yawningRatio)
-		if(count==0):
-		  #print(mouth)
-		  count+=1
-		# average the eye aspect ratio together for both eyes
-		ear = (leftEAR + rightEAR) / 2.0
-
-		# compute the convex hull for the left and right eye, then
+        leftEye = shape[lStart:lEnd]
+        rightEye = shape[rStart:rEnd]
+        mouth=shape[mStart:mEnd]
+        leftEAR = eye_aspect_ratio(leftEye)
+        rightEAR = eye_aspect_ratio(rightEye)
+        yawningRatio=detect_yanwing(mouth)
+        ear = (leftEAR + rightEAR) / 2.0
+        # compute the convex hull for the left and right eye, then
 		# visualize each of the eyes
-		leftEyeHull = cv2.convexHull(leftEye)
-		rightEyeHull = cv2.convexHull(rightEye)
-		mouthHull=cv2.convexHull(mouth)
-		cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-		cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-		cv2.drawContours(frame,[mouthHull],-1,(0,255,0),1)
+        leftEyeHull = cv2.convexHull(leftEye)
+        rightEyeHull = cv2.convexHull(rightEye)
+        mouthHull=cv2.convexHull(mouth)
+        cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+        cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+        cv2.drawContours(frame,[mouthHull],-1,(0,255,0),)
 
-		# check to see if the eye aspect ratio is below the blink
-		# threshold, and if so, increment the blink frame ounter
-		if yawningRatio>MOUTH_YAWNING_THRESH:
+  return ear,yawningRatio,frame,detectFace,distance
+# loop over frames from the video stream
+count=0
+#main function
+EYE_AR_THRESH = 0.27       # threshold to decide the eyes are closed
+EYE_AR_CONSEC_FRAMES = 2   # number of frames that eyes are closed to determine a blink
+MOUTH_YA_CONSEC_FRAMES=9   # number of frames that mouth is open to determine the driver is yawning
+MOUTH_YAWNING_THRESH=0.7   # threshold to decide the mouth is open
+# initialize the frame counters and the total number of blinks
+COUNTER = 0
+TOTAL = 0
+mouthCounter=0
+totalYawn=0
+s=''
+ear=0
+i=1
+detector,predictor=get_predictor()
+cap=cv2.VideoCapture(0)
+
+while True:
+	# grab the frame from the threaded video file stream, resize
+	# it, and convert it to grayscale
+	# channels)
+	if(i>=24):
+		i=1
+	ret,frame=cap.read()
+	ear,yawningRatio,frame,detectFace,distance=process_oneframe(frame,detector,predictor)
+	i=i+1
+	if yawningRatio>MOUTH_YAWNING_THRESH:
 			mouthCounter+=1
-		else:
+	else:
 			mouthCounter=0
-		if mouthCounter>=MOUTH_YA_CONSEC_FRAMES:
+	if mouthCounter>=MOUTH_YA_CONSEC_FRAMES:
 			totalYawn+=1
 			mouthCounter=0
-		if ear < EYE_AR_THRESH:
+	if ear < EYE_AR_THRESH:
 			COUNTER += 1
         
 		# otherwise, the eye aspect ratio is not below the blink
 		# threshold
-		else:
+	else:
 			# if the eyes were closed for a sufficient number of
 			# then increment the total number of blinks
-			if COUNTER >= EYE_AR_CONSEC_FRAMES:
-				TOTAL += 1
+		COUNTER=0
+	if COUNTER >= EYE_AR_CONSEC_FRAMES:
+		TOTAL += 1
 
 			# reset the eye frame counter
-			COUNTER = 0
+		COUNTER = 0
 
 		# draw the total number of blinks on the frame along with
 		# the computed eye aspect ratio for the frame
-	if (len(rects)>0):
-		if(distance<300):
+	if (detectFace>0):
+		if(distance<150):
 		   s='yes'#detect face
 		else:
 			s='no'
@@ -239,4 +217,4 @@ while True:
 
 # do a bit of cleanup
 cv2.destroyAllWindows()
-vs.stop()
+cap.release()
