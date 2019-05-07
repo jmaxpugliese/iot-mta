@@ -10,7 +10,7 @@ import base64
 import cPickle
 import datetime
 
-capture_rate = 3
+capture_rate = 5
 
 class VideoProducer(object):
   '''

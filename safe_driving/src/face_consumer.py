@@ -10,12 +10,17 @@ import base64
 import cPickle
 import datetime
 
+import face_reader
+
 class Consumer(object):
 
   def __init__(self):
     self._stream_name = 'iot-attention-monitor'
     self._shard_id = 'shardId-000000000006'
     self._iterator_type = 'LATEST'
+
+    self.eyes_closed_consecutive_frames = 0
+    self.looking_away_consecutive_frames = 0
 
   def create_aws_client(self, aws_service):
     with open('../aws.json') as aws:  
@@ -53,9 +58,28 @@ class Consumer(object):
       img_np = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
       gray = cv2.cvtColor(img_np, cv2.COLOR_BGR2GRAY)
 
-      cv2.imshow('frame', gray)
-      if cv2.waitKey(1) & 0xFF == ord('q'):
-          break
+      if gray is None:
+        break
+
+      eyes_open, looking_forward = face_reader.process_frame(gray)
+
+      if eyes_open is True:
+        self.eyes_closed_consecutive_frames = 0
+      else:
+        self.eyes_closed_consecutive_frames += 1
+        if self.eyes_closed_consecutive_frames > 3:
+          print("open up!")
+      
+      if looking_forward is True:
+        self.looking_away_consecutive_frames = 0
+      else:
+        self.looking_away_consecutive_frames += 1
+        if self.looking_away_consecutive_frames > 3:
+          print("look forward!")
+
+      # cv2.imshow('frame', gray)
+      # if cv2.waitKey(1) & 0xFF == ord('q'):
+      #     break
 
   def run(self):
     try:
@@ -68,18 +92,18 @@ class Consumer(object):
       finish = start + datetime.timedelta(seconds=30)
 
       while finish > datetime.datetime.now():
-          try:
-              response = kinesis.get_records(ShardIterator=next_iterator, Limit=30)
+          # try:
+            response = kinesis.get_records(ShardIterator=next_iterator, Limit=30)
 
-              records = response['Records']
+            records = response['Records']
 
-              if records:
-                  self.process_records(records)
+            if records:
+                self.process_records(records)
 
-              next_iterator = response['NextShardIterator']
-              time.sleep(0.5)
-          except Exception as e:
-            print(e)
+            next_iterator = response['NextShardIterator']
+            time.sleep(0.5)
+          # except Exception as e:
+          #   print(e)
 
     except KeyboardInterrupt:
       self.exit_with_msg('Closing client.', None)

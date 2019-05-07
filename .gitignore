@@ -21,6 +21,7 @@ pip-selfcheck.json
 
 # Protocol buffer compiled files
 # *_pb2.py
+*.dat
 
 # Credentials
 config.txt
