@@ -10,7 +10,7 @@ import base64
 import cPickle
 import datetime
 
-capture_rate = 30
+capture_rate = 3
 
 class VideoProducer(object):
   '''
@@ -34,23 +34,26 @@ class VideoProducer(object):
       )
 
   def send_frame(self, frame, frame_count):
-    retval, buff = cv2.imencode(".jpg", frame)
-    img_bytes = bytearray(buff)
+    try:
+      retval, buff = cv2.imencode(".jpg", frame)
+      img_bytes = bytearray(buff)
 
-    utc_dt = pytz.utc.localize(datetime.datetime.now())
-    now_ts_utc = (utc_dt - datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)).total_seconds()
+      utc_dt = pytz.utc.localize(datetime.datetime.now())
+      now_ts_utc = (utc_dt - datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)).total_seconds()
 
-    frame_package = {
-      'ApproximateCaptureTime' : now_ts_utc,
-      'FrameCount' : frame_count,
-      'ImageBytes' : img_bytes
-    }
+      frame_package = {
+        'ApproximateCaptureTime' : now_ts_utc,
+        'FrameCount' : frame_count,
+        'ImageBytes' : img_bytes
+      }
 
-    resp = self._kinesis.put_record(
-                    StreamName=self._stream_name,
-                    Data=cPickle.dumps(frame_package),
-                    PartitionKey="partitionkey")
-    print (resp)
+      resp = self._kinesis.put_record(
+                      StreamName=self._stream_name,
+                      Data=cPickle.dumps(frame_package),
+                      PartitionKey="partitionkey")
+      print (resp)
+    except Exception as e:
+      print(e)
 
   def run(self):
     try:
@@ -68,9 +71,9 @@ class VideoProducer(object):
 
         frame_count += 1
 
-        cv2.imshow('frame', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # cv2.imshow('frame', frame)
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
 
     except KeyboardInterrupt:
         self.exit_with_msg('Closing client.', None)

@@ -56,7 +56,6 @@ class Consumer(object):
       cv2.imshow('frame', gray)
       if cv2.waitKey(1) & 0xFF == ord('q'):
           break
-      # time.sleep(2)
 
   def run(self):
     try:
@@ -70,7 +69,7 @@ class Consumer(object):
 
       while finish > datetime.datetime.now():
           try:
-              response = kinesis.get_records(ShardIterator=next_iterator, Limit=25)
+              response = kinesis.get_records(ShardIterator=next_iterator, Limit=30)
 
               records = response['Records']
 
@@ -81,7 +80,6 @@ class Consumer(object):
               time.sleep(0.5)
           except Exception as e:
             print(e)
-              # time.sleep(1)
 
     except KeyboardInterrupt:
       self.exit_with_msg('Closing client.', None)
