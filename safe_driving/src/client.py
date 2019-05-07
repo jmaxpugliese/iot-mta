@@ -2,23 +2,25 @@
 # -*- coding: utf-8 -*-
 
 import cv2 #pip install opencv-python
-import json
 import time
+import json
+import pytz
 import boto3
+import base64
+import cPickle
+import datetime
 
-from imutils.video import VideoStream #pip install imutils
+capture_rate = 30
 
 class VideoProducer(object):
   '''
-  Client class takes as input a server IP address and port number.
-  The client will either (a) put: send a file to the server,
-  (b) get: request and receive a file from the server, (c) ls: request
-  and recieve a list of files on the server, or (d) exit: exit the session.
-  The client connects to the server and sends data based on the chosen action.
+  Producer sets up a connection with Amazon Kinesis and sends video frames
+  to the server
   '''
 
   def __init__(self):
-    self._stream_name = 'iot_safe_driver'
+    self._stream_name = 'iot-attention-monitor'
+    self._kinesis = self.create_aws_client('kinesis')
 
   def create_aws_client(self, aws_service):
     with open('../aws.json') as aws:  
@@ -31,40 +33,44 @@ class VideoProducer(object):
         region_name = config['aws_region']
       )
 
+  def send_frame(self, frame, frame_count):
+    retval, buff = cv2.imencode(".jpg", frame)
+    img_bytes = bytearray(buff)
+
+    utc_dt = pytz.utc.localize(datetime.datetime.now())
+    now_ts_utc = (utc_dt - datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)).total_seconds()
+
+    frame_package = {
+      'ApproximateCaptureTime' : now_ts_utc,
+      'FrameCount' : frame_count,
+      'ImageBytes' : img_bytes
+    }
+
+    resp = self._kinesis.put_record(
+                    StreamName=self._stream_name,
+                    Data=cPickle.dumps(frame_package),
+                    PartitionKey="partitionkey")
+    print (resp)
+
   def run(self):
     try:
-      kinesis = self.create_aws_client('kinesis')
+      vc = cv2.VideoCapture(0)
 
-      count = 0
-      while count < 30:
-        kinesis.put_record(
-                        StreamName=self._stream_name,
-                        Data=json.dumps({'count': count}),
-                        PartitionKey="partitionkey")
+      frame_count = 0
+      while True:
+        ret, frame = vc.read()
 
-        print(count)
-        time.sleep(3)
-        count = count +1
-
-      # vs = VideoStream(src=0).start()
-      # fileStream = False
-      # time.sleep(1.0)
-
-      # # loop over frames from the video stream
-      # count=0
-      # while True:
-      #   # if this is a file video stream, then we need to check if
-      #   # there any more frames left in the buffer to process
-      #   if fileStream and not vs.more():
-      #     break
-
-      #   # grab the frame from the threaded video file stream, resize
-      #   # it, and convert it to grayscale
-      #   # channels)
-      #   frame = vs.read()
+        if ret is False:
+          break
         
-      #   gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-      #   send_to_server(gray)
+        if frame_count % capture_rate == 0:
+          self.send_frame(frame, frame_count)
+
+        frame_count += 1
+
+        cv2.imshow('frame', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
 
     except KeyboardInterrupt:
         self.exit_with_msg('Closing client.', None)
