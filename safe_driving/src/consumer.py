@@ -2,18 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import json
-import time
-import boto3
-import numpy
-import base64
-import cPickle
-import datetime
+import json, time
+import boto3, numpy, base64, datetime, threading, dlib
+import _pickle as cPickle
 
 import face_reader
 
-class Consumer(object):
+DAT_FILENAME = '../src/shape_predictor_68_face_landmarks.dat'
 
+class Consumer(object):
   def __init__(self):
     self._stream_name = 'iot-attention-monitor'
     self._shard_id = 'shardId-000000000006'
@@ -21,6 +18,8 @@ class Consumer(object):
 
     self.eyes_closed_consecutive_frames = 0
     self.looking_away_consecutive_frames = 0
+    self.eyeOpen = True
+    self.lookAhead = True
 
   def create_aws_client(self, aws_service):
     with open('../aws.json') as aws:  
@@ -40,7 +39,15 @@ class Consumer(object):
           data = record['Data']
           yield part_key, data
   
+  def get_info(self):
+    return {
+      'eye': self.eyeOpen,
+      'head': self.lookAhead
+    }
+
   def process_records(self, records):
+    detector=dlib.get_frontal_face_detector()
+    predictor=dlib.shape_predictor(DAT_FILENAME)
     for part_key, data in self.iter_records(records):
 
       frame_package_b64 = data
@@ -61,25 +68,25 @@ class Consumer(object):
       if gray is None:
         break
 
-      eyes_open, looking_forward = face_reader.process_frame(gray)
+      eyes_open, looking_forward = face_reader.process_frame(detector,predictor,gray)
 
       if eyes_open is True:
         self.eyes_closed_consecutive_frames = 0
+        self.eyeOpen = True
       else:
         self.eyes_closed_consecutive_frames += 1
         if self.eyes_closed_consecutive_frames > 3:
-          print("open up!")
+          self.eyeOpen = False
       
       if looking_forward is True:
         self.looking_away_consecutive_frames = 0
+        self.lookAhead = True
       else:
         self.looking_away_consecutive_frames += 1
         if self.looking_away_consecutive_frames > 3:
-          print("look forward!")
-
-      cv2.imshow('frame', gray)
-      if cv2.waitKey(1) & 0xFF == ord('q'):
-          break
+          self.lookAhead = False
+      # cv2.imshow('frame', gray)
+      
 
   def run(self):
     try:
@@ -88,26 +95,22 @@ class Consumer(object):
       
       next_iterator = response['ShardIterator']
 
-      start = datetime.datetime.now()
-      finish = start + datetime.timedelta(seconds=30)
+      # start = datetime.datetime.now()
+      # finish = start + datetime.timedelta(seconds=30)
 
-      while finish > datetime.datetime.now():
-          # try:
-            response = kinesis.get_records(ShardIterator=next_iterator, Limit=30)
+      while True:
+        try:
+          response = kinesis.get_records(ShardIterator=next_iterator, Limit=30)
 
-            records = response['Records']
+          records = response['Records']
 
-            if records:
-                self.process_records(records)
+          if records:
+              self.process_records(records)
 
-            next_iterator = response['NextShardIterator']
-            time.sleep(0.5)
-          # except Exception as e:
-          #   print(e)
+          next_iterator = response['NextShardIterator']
+          time.sleep(0.5)
+        except Exception as e:
+          print(e)
 
     except KeyboardInterrupt:
       self.exit_with_msg('Closing client.', None)
-
-if __name__ == '__main__':
-    c = Consumer()
-    c.run() 

@@ -7,7 +7,7 @@ import json
 import pytz
 import boto3
 import base64
-import cPickle
+import _pickle as cPickle
 import datetime
 
 capture_rate = 5
@@ -51,14 +51,15 @@ class VideoProducer(object):
                       StreamName=self._stream_name,
                       Data=cPickle.dumps(frame_package),
                       PartitionKey="partitionkey")
-      print (resp)
+      # print (resp)
     except Exception as e:
       print(e)
 
   def run(self):
     try:
       vc = cv2.VideoCapture(0)
-
+      vc.set(3,640)
+      vc.set(4,480)
       frame_count = 0
       while True:
         ret, frame = vc.read()
@@ -77,8 +78,7 @@ class VideoProducer(object):
 
     except KeyboardInterrupt:
         self.exit_with_msg('Closing client.', None)
-        
 
-if __name__ == '__main__':
-    producer = VideoProducer()
-    producer.run() 
+if __name__ == "__main__":
+  producer = VideoProducer()
+  producer.run()

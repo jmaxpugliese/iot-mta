@@ -1,0 +1,30 @@
+<html>
+	<head>
+		<title>Monitoring Demo Site</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  		<script src="{{ url_for("static", filename="lpoll.js") }}"></script>
+		<style>
+			#updated {
+				background-color: yellow;
+				width: 1.1in;
+				float: right;
+			    margin-left: auto;
+				margin-right: auto;
+			}
+			#warning {
+				background-color: red;
+				font-size: 60px;
+			}
+			.content {
+				font-size: 50px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="updated">UPDATED</div>
+		<div id="head" class = "content"></div>
+		<div id="eye" class = "content"></div>
+		<div id="phone" class = "content"></div>
+		<div id="warning"></div>
+	</body>
+</html>

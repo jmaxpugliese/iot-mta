@@ -16,8 +16,6 @@ EYE_AR_CONSEC_FRAMES = 2
 MOUTH_YA_CONSEC_FRAMES=9
 MOUTH_YAWNING_THRESH=0.7
 
-DAT_FILENAME = 'shape_predictor_68_face_landmarks.dat'
-
 # grab the indexes of the facial landmarks for the left and
 # right eye, respectively
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
@@ -87,13 +85,13 @@ def showPose(im, image_points):
 
   return im ,distance
 
-def process_frame(gray_frame):
+def process_frame(detector,predictor,gray_frame):
   eyes_open = True
   looking_forward = True
 
   frame = []
   # detect faces in the grayscale frame
-  detector = dlib.get_frontal_face_detector()
+  #detector = dlib.get_frontal_face_detector()
   rects = detector(gray_frame, 0)
   #print(rects)
   # We now need to loop over each of the faces in the frame and 
@@ -103,7 +101,7 @@ def process_frame(gray_frame):
       # determine the facial landmarks for the face region, then
       # convert the facial landmark (x, y)-coordinates to a NumPy
       # array
-      predictor = dlib.shape_predictor(DAT_FILENAME)
+      #predictor = dlib.shape_predictor(DAT_FILENAME)
       shape = predictor(gray_frame, rect)
       
       shape = face_utils.shape_to_np(shape)
@@ -170,7 +168,7 @@ def process_frame(gray_frame):
 
   # if no rects, then looking away
   if len(rects) > 0:
-    if distance < 300:
+    if distance < 200:
       looking_forward = True
     else:
       looking_forward = False
@@ -187,7 +185,7 @@ def process_frame(gray_frame):
     cv2.putText(frame, "looking ahead?: {}".format(looking_forward), (300, 60),
         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     # show the frame
-    cv2.imshow("Frame", frame)
+    # cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
 
   return (eyes_open, looking_forward)
