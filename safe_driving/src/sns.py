@@ -23,8 +23,8 @@ class SNS_subscriber(object):
       topic_arn = topic['TopicArn']
 
 cli=SNS_subscriber('sns')
-topic = cli._sns.create_topic(Name="SAFE_DRIVING")
-topic_arn = topic['TopicArn']
-print(topic)
+#topic = cli._sns.create_topic(Name="SAFE_DRIVING")
+#topic_arn = topic['TopicArn']
+#print(topic)
     # send!
 cli._sns.publish(PhoneNumber='+16462093724',Message="you are falling asleep!")
