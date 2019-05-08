@@ -1,0 +1,8 @@
+{
+	"auth": {
+		"cognito99beef35": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation"
+		}
+	}
+}

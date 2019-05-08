@@ -1,0 +1,19 @@
+{
+    "android": {
+        "awscloudformation": {
+            "AuthRoleName": "testnew-android-20190506191205-authRole",
+            "UnauthRoleArn": "arn:aws:iam::267436726490:role/testnew-android-20190506191205-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::267436726490:role/testnew-android-20190506191205-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "testnew-android-20190506191205-deployment",
+            "UnauthRoleName": "testnew-android-20190506191205-unauthRole",
+            "StackName": "testnew-android-20190506191205",
+            "StackId": "arn:aws:cloudformation:us-east-1:267436726490:stack/testnew-android-20190506191205/5ae08c60-7054-11e9-835b-0e348661d726"
+        },
+        "categories": {
+            "auth": {
+                "cognito99beef35": {}
+            }
+        }
+    }
+}
