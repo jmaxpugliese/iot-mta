@@ -98,79 +98,79 @@ def process_frame(gray_frame):
   #print(rects)
   # We now need to loop over each of the faces in the frame and 
   # then apply facial landmark detection to each of them
-  print (len(rects))
-  for rect in rects:
-    # determine the facial landmarks for the face region, then
-    # convert the facial landmark (x, y)-coordinates to a NumPy
-    # array
-    predictor = dlib.shape_predictor(DAT_FILENAME)
-    shape = predictor(gray_frame, rect)
-    
-    shape = face_utils.shape_to_np(shape)
+  if len(rects) > 0:
+    for rect in rects:
+      # determine the facial landmarks for the face region, then
+      # convert the facial landmark (x, y)-coordinates to a NumPy
+      # array
+      predictor = dlib.shape_predictor(DAT_FILENAME)
+      shape = predictor(gray_frame, rect)
+      
+      shape = face_utils.shape_to_np(shape)
 
-    image_points=numpy.array([
-        shape[30],     # Nose tip
-        shape[8],     # Chin
-        shape[45],     # Left eye left corner
-        shape[36],     # Right eye right corne
-        shape[54],     # Left Mouth corner
-        shape[48]      # Right mouth corner
-      ], dtype='double')
+      image_points=numpy.array([
+          shape[30],     # Nose tip
+          shape[8],     # Chin
+          shape[45],     # Left eye left corner
+          shape[36],     # Right eye right corne
+          shape[54],     # Left Mouth corner
+          shape[48]      # Right mouth corner
+        ], dtype='double')
 
-    frame, distance=showPose(gray_frame, image_points)
-    
-    # extract the left and right eye coordinates, then use the
-    # coordinates to compute the eye aspect ratio for both eyes
-    leftEye = shape[lStart:lEnd]
-    rightEye = shape[rStart:rEnd]
-    mouth=shape[mStart:mEnd]
-    leftEAR = eye_aspect_ratio(leftEye)
-    rightEAR = eye_aspect_ratio(rightEye)
-    yawningRatio=detect_yanwing(mouth)
-    
-    # average the eye aspect ratio together for both eyes
-    ear = (leftEAR + rightEAR) / 2.0
+      frame, distance=showPose(gray_frame, image_points)
+      
+      # extract the left and right eye coordinates, then use the
+      # coordinates to compute the eye aspect ratio for both eyes
+      leftEye = shape[lStart:lEnd]
+      rightEye = shape[rStart:rEnd]
+      mouth=shape[mStart:mEnd]
+      leftEAR = eye_aspect_ratio(leftEye)
+      rightEAR = eye_aspect_ratio(rightEye)
+      yawningRatio=detect_yanwing(mouth)
+      
+      # average the eye aspect ratio together for both eyes
+      ear = (leftEAR + rightEAR) / 2.0
 
-    # compute the convex hull for the left and right eye, then
-    # visualize each of the eyes
-    leftEyeHull = cv2.convexHull(leftEye)
-    rightEyeHull = cv2.convexHull(rightEye)
-    mouthHull=cv2.convexHull(mouth)
-    cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-    cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
-    cv2.drawContours(frame,[mouthHull],-1,(0,255,0),1)
+      # compute the convex hull for the left and right eye, then
+      # visualize each of the eyes
+      leftEyeHull = cv2.convexHull(leftEye)
+      rightEyeHull = cv2.convexHull(rightEye)
+      mouthHull=cv2.convexHull(mouth)
+      cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
+      cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+      cv2.drawContours(frame,[mouthHull],-1,(0,255,0),1)
 
-    # check to see if the eye aspect ratio is below the blink
-    # threshold, and if so, increment the blink frame ounter
-    # @TODO
-    # if yawningRatio>MOUTH_YAWNING_THRESH:
-    #   mouthCounter+=1
-    # else:
-    #   mouthCounter=0
-    # if mouthCounter>=MOUTH_YA_CONSEC_FRAMES:
-    #   totalYawn+=1
-    #   mouthCounter=0
+      # check to see if the eye aspect ratio is below the blink
+      # threshold, and if so, increment the blink frame ounter
+      # @TODO
+      # if yawningRatio>MOUTH_YAWNING_THRESH:
+      #   mouthCounter+=1
+      # else:
+      #   mouthCounter=0
+      # if mouthCounter>=MOUTH_YA_CONSEC_FRAMES:
+      #   totalYawn+=1
+      #   mouthCounter=0
 
-    # if lower, eyes are closed
-    if ear < EYE_AR_THRESH:
-      eyes_open = False
-        
-    # # otherwise, the eye aspect ratio is not below the blink
-    # # threshold
-    # else:
-    #   # if the eyes were closed for a sufficient number of
-    #   # then increment the total number of blinks
-    #   if COUNTER >= EYE_AR_CONSEC_FRAMES:
-    #     TOTAL += 1
+      # if lower, eyes are closed
+      if ear < EYE_AR_THRESH:
+        eyes_open = False
+          
+      # # otherwise, the eye aspect ratio is not below the blink
+      # # threshold
+      # else:
+      #   # if the eyes were closed for a sufficient number of
+      #   # then increment the total number of blinks
+      #   if COUNTER >= EYE_AR_CONSEC_FRAMES:
+      #     TOTAL += 1
 
-    #   # reset the eye frame counter
-    #   COUNTER = 0
-    # draw the total number of blinks on the frame along with
-    # the computed eye aspect ratio for the frame
+      #   # reset the eye frame counter
+      #   COUNTER = 0
+      # draw the total number of blinks on the frame along with
+      # the computed eye aspect ratio for the frame
 
   # if no rects, then looking away
-  if (len(rects)>0):
-    if(distance<300):
+  if len(rects) > 0:
+    if distance < 300:
       looking_forward = True
     else:
       looking_forward = False
@@ -190,6 +190,6 @@ def process_frame(gray_frame):
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
 
-    return (eyes_open, looking_forward)
+  return (eyes_open, looking_forward)
 
 

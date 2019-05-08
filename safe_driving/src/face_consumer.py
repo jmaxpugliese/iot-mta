@@ -77,9 +77,9 @@ class Consumer(object):
         if self.looking_away_consecutive_frames > 3:
           print("look forward!")
 
-      # cv2.imshow('frame', gray)
-      # if cv2.waitKey(1) & 0xFF == ord('q'):
-      #     break
+      cv2.imshow('frame', gray)
+      if cv2.waitKey(1) & 0xFF == ord('q'):
+          break
 
   def run(self):
     try:
