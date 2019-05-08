@@ -87,13 +87,13 @@ def showPose(im, image_points):
 
   return im ,distance
 
-def process_frame(gray_frame):
+def process_frame(detector,predictor,gray_frame):
   eyes_open = True
   looking_forward = True
-
+  distance=0
   frame = []
   # detect faces in the grayscale frame
-  detector = dlib.get_frontal_face_detector()
+  
   rects = detector(gray_frame, 0)
   #print(rects)
   # We now need to loop over each of the faces in the frame and 
@@ -103,7 +103,7 @@ def process_frame(gray_frame):
       # determine the facial landmarks for the face region, then
       # convert the facial landmark (x, y)-coordinates to a NumPy
       # array
-      predictor = dlib.shape_predictor(DAT_FILENAME)
+      
       shape = predictor(gray_frame, rect)
       
       shape = face_utils.shape_to_np(shape)
@@ -169,8 +169,9 @@ def process_frame(gray_frame):
       # the computed eye aspect ratio for the frame
 
   # if no rects, then looking away
+  print(distance)
   if len(rects) > 0:
-    if distance < 300:
+    if distance < 200:
       looking_forward = True
     else:
       looking_forward = False
@@ -178,7 +179,7 @@ def process_frame(gray_frame):
    looking_forward = False
     
   if len(frame) > 0:
-    cv2.putText(frame, "Blinks: {}".format(3), (10, 30),
+    cv2.putText(frame, "eyes open: {}".format(eyes_open), (10, 30),
         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30),
         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
@@ -186,10 +187,16 @@ def process_frame(gray_frame):
             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
     cv2.putText(frame, "looking ahead?: {}".format(looking_forward), (300, 60),
         cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-    # show the frame
+     #show the frame
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
 
   return (eyes_open, looking_forward)
-
-
+vc = cv2.VideoCapture(0)
+vc.set(3,640)
+vc.set(4,480)
+detector = dlib.get_frontal_face_detector()
+predictor = dlib.shape_predictor(DAT_FILENAME)
+while True:
+    ret, frame = vc.read()
+    eyes_open,looking_forward=process_frame(detector,predictor,frame)

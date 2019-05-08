@@ -41,6 +41,8 @@ class Consumer(object):
           yield part_key, data
   
   def process_records(self, records):
+    detector = dlib.get_frontal_face_detector()
+    predictor = dlib.shape_predictor(DAT_FILENAME)
     for part_key, data in self.iter_records(records):
 
       frame_package_b64 = data
@@ -61,7 +63,7 @@ class Consumer(object):
       if gray is None:
         break
 
-      eyes_open, looking_forward = face_reader.process_frame(gray)
+      eyes_open, looking_forward = face_reader.process_frame(detector,predictor,gray)
 
       if eyes_open is True:
         self.eyes_closed_consecutive_frames = 0

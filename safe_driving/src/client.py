@@ -7,7 +7,7 @@ import json
 import pytz
 import boto3
 import base64
-import cPickle
+import _pickle as cPickle
 import datetime
 
 capture_rate = 5
@@ -58,7 +58,8 @@ class VideoProducer(object):
   def run(self):
     try:
       vc = cv2.VideoCapture(0)
-
+      vc.set(3,640)
+      vc.set(4,480)
       frame_count = 0
       while True:
         ret, frame = vc.read()
